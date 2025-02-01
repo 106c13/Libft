@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdarg.h>
-#include "tmp.h"
+#include "libft.h"
 
-static char	*ft_ltoa(char type, void *num)
+
 
 
 static void	ft_printstr(char *str)
@@ -15,20 +15,51 @@ static void	ft_printstr(char *str)
 	}
 }
 
-static char *convert_to_string(char type, va_list *args) {
-    if (type == 'd') 
-        return ft_itoa(va_arg(*args, int));
-    else if (type == 'c')
+
+char *ft_ptos(void *ptr) 
+{
+    unsigned long addr;
+    char *str;
+    int size;
+
+    addr = (unsigned long)ptr;
+    size = 1;
+    while (addr > 0)
+    {
+        addr = addr / 2;
+        size++;
+    }
+    size = size / 4 + 2;
+    str = malloc((size + 1) * sizeof(char));
+    str[0] = '0';
+    str[1] = 'x';
+    str[size] = '\0';
+    addr = (unsigned long)ptr;
+    while(size > 2)
+    {
+        str[size - 1] = "0123456789abcdef"[addr % 16];
+        addr /= 16;
+        size--;
+    }
+    return str;
+}
+
+
+static char *ft_converter(const char *input, va_list *args)
+{
+    if (*input == 'd') 
+        return (ft_itoa(va_arg(*args, int)));
+    else if (*input == 'c')
     {
         char *result = (char *)malloc(2 * sizeof(char));
         result[0] = (char)va_arg(*args, int);
         result[1] = '\0';
         return (result);
     }
-    else if (type == 's')
-    	return (va_arg(*args, char *));
-    else if (type == 'lld')
-    	return (ft_ltoa(type, ))
+    else if (*input == 's')
+    	return (ft_strdup(va_arg(*args, char *)));
+    else if (*input == 'p')
+        return (ft_ptos(va_arg(*args, void *)));
 
     return NULL;
 }
@@ -41,13 +72,11 @@ int ft_printf(const char *input, ...) {
     while (*input) {
         if (*input == '%')
         {
-            str = convert_to_string(*(input + 1), &args);
-            if (str != NULL)
-            {
-                ft_printstr(str);
-                free(str);
-            }
-            input++;  // Skip over the format specifier
+            str = ft_converter(input + 1, &args);
+
+            ft_printstr(str);
+            free(str);
+            input++;
         }
         else
             write(1, input, 1);
@@ -58,6 +87,7 @@ int ft_printf(const char *input, ...) {
 }
 
 int main() {
-    ft_printf("%lld", 9223372036854775807);
+    int a = 10;
+    ft_printf("%p %d, %p, %c", a, 12301031230, "123", 'c');
     return 0;
 }
