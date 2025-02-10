@@ -39,9 +39,13 @@ void print_negative_num(char *str, int *count, int width)
 void print_flag(t_arg *arg, char **str, int *count)
 {
     if (arg->flag[1] && **str != '-')
+    {
         ft_cputchar('+', count);
+    }
     else if (arg->flag[2] && **str != '-')
+    {
         ft_cputchar(' ', count);
+    }
     else if (**str == '-')
     {
         ft_cputchar('-', count);
@@ -57,24 +61,23 @@ void print_int(int num, t_arg *arg, int *count)
     str = ft_itoa(num);
     if ((arg->flag[1] || arg->flag[2]) && num >= 0)
         arg->width--;
+    if (arg->prec > 0)
+        arg->width -= arg->prec - ft_strlen(str);
+    if (!arg->flag[0] && !arg->flag[3])
+        print_surplus(arg->width - ft_strlen(str), ' ', count);
+    if (arg->prec > 0)
+    {
+        print_flag(arg, &str, count);
+        print_surplus(arg->prec - ft_strlen(str), '0', count);
+        arg->prec = -2;
+    }
+    if (arg->prec != -2)
+        print_flag(arg, &str, count);
     if (arg->flag[3] && !arg->flag[0])
-    {
-        print_flag(arg, &str, count);
         print_surplus(arg->width - ft_strlen(str), '0', count);
-        ft_cputstr(str, count);
-    }
-    else if (!arg->flag[0])
-    {
+    ft_cputstr(str, count);
+    if (arg->flag[0])
         print_surplus(arg->width - ft_strlen(str), ' ', count);
-        print_flag(arg, &str, count);
-        ft_cputstr(str, count);
-    }
-    else if (arg->flag[0])
-    {
-        print_flag(arg, &str, count);
-        ft_cputstr(str, count);
-        print_surplus(arg->width - ft_strlen(str), ' ', count);
-    }
     free(str);
 }
 
@@ -155,9 +158,6 @@ void print_unsigned(unsigned int num, t_arg *arg, int *count)
     char *str;
 
     str = ft_utoa(num);
-    if ((arg->flag[1] || arg->flag[2]))
-        arg->width--;
-    print_flag(arg, &str, count);
     if (arg->flag[3] && !arg->flag[0])
     {
         print_surplus(arg->width - ft_strlen(str), '0', count);
@@ -216,43 +216,22 @@ int ft_printf(const char *format, ...)
 }
 
 int main() {
-    printf("%d\n", printf("|%#-20.10u|", 4000000000));  // with 10 precision and 20 width
-    ft_printf("%d\n", ft_printf("|%#-20.10u|", 4000000000));  // with 10 precision and 20 width
+    printf("%d\n", printf("|%-+ 4d|", 4));
+    ft_printf("%d\n", ft_printf("|%-+ 4d|", 4));
 
-    // Example 2: Zero Padding with a Width of 15
-    printf("%d\n", printf("|%0-15u|", 4000000000));  // zero padding, width 15
-    ft_printf("%d\n", ft_printf("|%0-15u|", 4000000000));  // zero padding, width 15
+    printf("%d\n", printf("|%0+ 4d|", 4));
+    ft_printf("%d\n", ft_printf("|%0+ 4d|", 4));
 
-    // Example 3: Width of 10 and + Flag
-    printf("%d\n", printf("|%+10u|", 4000000000));  // width 10 with `+` flag
-    ft_printf("%d\n", ft_printf("|%+10u|", 4000000000));  // width 10 with `+` flag
+    printf("%d\n", printf("|%0- 4d|", 4));
+    ft_printf("%d\n", ft_printf("|%0- 4d|", 4));
 
-    // Example 4: Left Alignment with Width 15
-    printf("%d\n", printf("|%-15u|", 4000000000));  // left-aligned, width 15
-    ft_printf("%d\n", ft_printf("|%-15u|", 4000000000));  // left-aligned, width 15
+    printf("%d\n", printf("|%0- 1d|", 4));
+    ft_printf("%d\n", ft_printf("|%0- 1d|", 4));
 
-    // Example 5: Width of 10 and # Flag (with prefix)
-    printf("%d\n", printf("|%#10u|", 4000000000));  // width 10 with `#` flag (prefix)
-    ft_printf("%d\n", ft_printf("|%#10u|", 4000000000));  // width 10 with `#` flag (prefix)
+    printf("%d\n", printf("|% 4.2d|", 4));
+    ft_printf("%d\n", ft_printf("|% 4.2d|", 4));
 
-    // Example 6: Width of 10 with precision of 5
-    printf("%d\n", printf("|%10.5u|", 4000000000));  // width 10 with precision 5
-    ft_printf("%d\n", ft_printf("|%10.5u|", 4000000000));  // width 10 with precision 5
-
-    // Example 7: Width of 10, precision of 5, and 0 padding
-    printf("%d\n", printf("|%010.5u|", 4000000000));  // zero-padded with width 10 and precision 5
-    ft_printf("%d\n", ft_printf("|%010.5u|", 4000000000));  // zero-padded with width 10 and precision 5
-
-    // Example 8: Width 15 with space for positive number
-    printf("%d\n", printf("|% 15u|", 4000000000));  // width 15 with space for positive number
-    ft_printf("%d\n", ft_printf("|% 15u|", 4000000000));  // width 15 with space for positive number
-
-    // Example 9: Just the width without any additional flags
-    printf("%d\n", printf("|%15u|", 4000000000));  // width 15
-    ft_printf("%d\n", ft_printf("|%15u|", 4000000000));  // width 15
-
-    // Example 10: Zero padding with precision
-    printf("%d\n", printf("|%010.10u|", 4000000000));  // zero-padded with width 10 and precision 10
-    ft_printf("%d\n", ft_printf("|%010.10u|", 4000000000)); 
+    printf("%d\n", printf("|%4.5d|", 4));
+    ft_printf("%d\n", ft_printf("|%4.5d|", 4));
     return 0;
-}
+}   
